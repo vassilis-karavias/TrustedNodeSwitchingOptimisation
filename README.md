@@ -78,4 +78,60 @@ cost_node is the cost of turning on the trusted node, cost_connection is the cos
 Methods to do in depth analysis are provided in optimisation_switching_model_with_calibration. For example to investigate the time variation use:  
 **time_variation_analysis(cap_needed_location, edge_data_location, node_type_location, position_node_file, position_edge_file,
                             cmin, time_limit=1e5, cost_on_trusted_node=1,cost_detector=0.1, cost_source=0.01, f_switch=0.1, Lambda=100, data_storage_location = None)**
-cap_needed_location is nk_file. data_storage_location is optional and if given will store the data in each iteration.
+cap_needed_location is nk_file. data_storage_location is optional and if given will store the data in each iteration.  
+Other methods are  
+*plot_cost_with_increasing_cmin_compare_with_no_loss(cap_needed_location, edge_data_location, node_type_location, position_node_file, position_edge_file,
+                                                        cap_needed_location_no_switch, edge_data_location_no_switch,
+                                                        node_type_location_no_switch, position_node_file_no_switch,
+                                                        position_edge_file_no_switch,
+                                                        f_switch, time_limit=1e5, cost_on_trusted_node=1, cost_detector=0.1,
+                                                        cost_source=0.01, Lambda=100,
+                                                        data_storage_location_keep_each_loop=None,
+                                                        data_storage_location_keep_each_loop_no_switch=None, extra = "no_switching")*
+extra is for the plotting save location.  
+*f_switch_parameter_sweep(cap_needed_location, edge_data_location, node_type_location, position_node_file, position_edge_file,
+                            cap_needed_location_no_switch, edge_data_location_no_switch, node_type_location_no_switch, position_node_file_no_switch, position_edge_file_no_switch,
+                         cmin, time_limit=1e5, cost_on_trusted_node=1,cost_detector=0.1, cost_source=0.01, Lambda=100, data_storage_location_keep_each_loop = None, data_storage_location_keep_each_loop_no_switch = None)*  
+*switch_loss_cost_comparison(cmin, f_switch = 0.1, time_limit=1e5, cost_on_trusted_node=1,cost_detector=0.1, cost_source=0.01, Lambda=100, data_storage_location_keep_each_loop = None, data_storage_location_keep_each_loop_no_switch = None)*  
+note for this method the file names are specified by: nk_file= f"11_cap_needed_bb84_graph_db_switch_{round(switch_loss,2)}.csv", capacity_values_file = f"11_edge_data_capacity_graph_bb84_network_db_switch_{round(switch_loss,2)}.csv", node_type_file = f"11_node_data_capacity_graph_bb84_network_db_switch_{round(switch_loss,2)}.csv",
+            position_node_file=f"11_nodes_bb84_network_position_graph_db_switch_{round(switch_loss,2)}.csv", position_edge_file=f"11_edges_bb84_network_position_graph_db_switch_{round(switch_loss,2)}.csv" for switching and         nk_file=f"11_cap_needed_bb84_graph_db_switch_6.0.csv",
+        capacity_values_file=f"11_edge_data_capacity_graph_bb84_network_no_switching.csv",
+        node_type_file=f"11_node_data_capacity_graph_bb84_network_no_switching.csv",
+        position_node_file=f"11_nodes_bb84_network_position_graph_db_switch_0.5.csv",
+        position_edge_file=f"11_edges_bb84_network_position_graph_db_switch_0.5.csv" for no switching.  
+*compare_different_detector_parameter(cmin, f_switch = 0.1, time_limit=1e5, cost_on_trusted_node=1,cost_detector=0.1, cost_source=0.01, Lambda=100)*  
+note for this method the file names are specified by: nk_file=f"14_cap_needed_bb84_graph.csv",
+                capacity_values_file=f"14_edge_data_capacity_graph_bb84_network_{eff}_eff.csv",
+                node_type_file=f"14_node_data_capacity_graph_bb84_network_{eff}_eff.csv",
+                position_node_file=f"14_nodes_bb84_network_position_graph.csv",
+                position_edge_file=f"14_edges_bb84_network_position_graph.csv"  
+*cold_vs_hot_detectors_cost(cap_needed_location, edge_data_location, node_type_location, position_node_file, position_edge_file,
+                            cap_needed_location_cold_det, edge_data_location_cold_det, node_type_location_cold_det,
+                         cmin, time_limit=1e5, cost_on_trusted_node=1,cost_detector=0.1, cost_on_trusted_node_cold=3.5, cost_detector_cold=0.137, cost_source=0.02, Lambda=100, f_switch = 0.1, data_storage_location_keep_each_loop = None, data_storage_location_keep_each_loop_cold_det = None)*       
+*cost_detector_cost_on_ratio(cap_needed_location, edge_data_location, node_type_location, position_node_file, position_edge_file,cap_needed_location_no_switch, edge_data_location_no_switch, node_type_location_no_switch,
+                         cmin, time_limit=1e3, cost_on_trusted_node=1, cost_source=0.01, f_switch=0.1, Lambda=100, data_storage_location_keep_each_loop = None, data_storage_location_keep_each_loop_no_switch = None)*  
+*plot_graphs_m_variation(cap_needed_location, edge_data_location, node_type_location, position_node_file, position_edge_file,
+                         cmin, time_limit=1e5, cost_on_trusted_node=1, cost_source=0.01, cost_detector = 0.1, f_switch=0.1, Lambda=100, data_storage_location_keep_each_loop = None)*  
+## Heuristic  
+We provide 2 different heuristics for the switching model: one is the relaxation heuristic. To use this heuristic the files:  
+**LP_relaxation.py**
+**Heuristic_Model.py**  
+is provided. First import the appropriate graphs using the imports from trusted_node_utils. Make the key_dict bidirectional. To instanciate the model, use:  
+**model = LP_relaxation.LP_relaxation_Trusted_Nodes_fixed_switching_time_relaxation(name, g, key_dict)**  
+name is a placeholder name for the problem. Then set up the heuristic  
+**heuristic = Heuristic_Model.Heuristic(Lambda, f_switch, C_det, C_source, c_on, cmin)**  
+c_on is the cost of turning on a trusted node, C_det is the cost of a detector, C_source is the cost of a source.  
+To get the best model:  
+**model_best = heuristic.full_recursion(initial_model=model)**  
+To extract the cost of the model found by the heuristic use:  
+**heuristic.calculate_current_solution_cost(model_best)**  
+To print the values of all the variables in the heuristic model use  
+**heuristic.print_current_solution_cost_breakdown(model_best)**  
+We also provide a genetic algorithm heuristic in  
+**Heuristic_Genetic_Model.py**  
+First import the appropriate graphs using the imports from trusted_node_utils. Make the key_dict bidirectional. To set up the heuristic use  
+**heuristic = Heuristic_Genetic_Model.Heuristic_Genetic(graph, key_dict, Lambda, f_switch, C_det, C_source, c_on, cmin)**  
+To obtain the best fit use:  
+**chromosome, fitness_value = heuristic.full_recursion(number_parents_in_next_population, next_population_size, p_cross, prob_mutation, number_steps)**  
+chromosome is the best chromosome (in this model taken as an array of which trusted nodes are on) and fitness_value is the best cost of the model. The input parameters are parameters for genetic models. number_parents_in_next_population denotes
+the number of parents that are used to generate the next population. next_population_size is the number of children generated in each population. p_cross is the probability of a crossover occuring between two parents during the generation of the new population prob_mutation is the probability that one of the children's chromosome undergoes a mutation. number_steps is the number of population steps before the best model is extracted.
