@@ -139,8 +139,8 @@ with open('rates_hotbob_15_eff.csv', mode='r') as csv_file:
     # new_graphs.store_n_k_for_n_state_bb84(dictionary_bb84, c_min=1000, store_file_location="t_cap_needed_bb84_graph")
 # new_graphs_2.store_capacity_edge_graph_distance_bb84_no_switching(dictionary_bb84_15_eff, store_file_location = "18_edge_data_capacity_graph_bb84_network_no_switching",  node_data_store_location = "18_node_data_capacity_graph_bb84_network_no_switching")
 # new_graphs_2.store_capacity_edge_graph_distance_bb84(dictionary_bb84_15_eff, store_file_location = f"18_edge_data_capacity_graph_bb84_network",  node_data_store_location = f"18_node_data_capacity_graph_bb84_network")
-new_graphs_2.store_capacity_edge_graph_distance_bb84_no_switching(dictionary_bb84_15_eff, store_file_location = "18_edge_data_capacity_graph_bb84_network_no_switching",  node_data_store_location = "18_node_data_capacity_graph_bb84_network_no_switching")
-new_graphs_2.store_capacity_edge_graph_distance_bb84(dictionary_bb84_15_eff, store_file_location = f"18_edge_data_capacity_graph_bb84_network",  node_data_store_location = f"18_node_data_capacity_graph_bb84_network")
+# new_graphs_2.store_capacity_edge_graph_distance_bb84_no_switching(dictionary_bb84_15_eff, store_file_location = "18_edge_data_capacity_graph_bb84_network_no_switching",  node_data_store_location = "18_node_data_capacity_graph_bb84_network_no_switching")
+# new_graphs_2.store_capacity_edge_graph_distance_bb84(dictionary_bb84_15_eff, store_file_location = f"18_edge_data_capacity_graph_bb84_network",  node_data_store_location = f"18_node_data_capacity_graph_bb84_network")
 # new_graphs_2.store_capacity_edge_graph_distance_bb84_no_switching(dictionary_bb84_15_eff, store_file_location = "14_edge_data_capacity_graph_bb84_network_no_switching_15_eff",  node_data_store_location = "14_node_data_capacity_graph_bb84_network_no_switching_15_eff")
 # new_graphs_2.store_capacity_edge_graph_distance_bb84(dictionary_bb84_20_eff, store_file_location = f"real_edge_data_2",  node_data_store_location = f"real_node_data_2")
 # new_graphs_2.store_capacity_edge_graph_distance_bb84_no_switching(dictionary_bb84_20_eff, store_file_location = "real_edge_data_no_switching_2",  node_data_store_location = "real_node_data_no_switching_2")
@@ -153,10 +153,10 @@ new_graphs_2.store_capacity_edge_graph_distance_bb84(dictionary_bb84_15_eff, sto
 
 
 
-# new_graphs.store_capacity_edge_graph_distance_bb84(dictionary_bb84, store_file_location = "10_edge_data_capacity_graph_bb84_network",  node_data_store_location = "10_node_data_capacity_graph_bb84_network")
-# new_graphs.store_capacity_edge_graph_distance_bb84_no_switching(dictionary_bb84, store_file_location = "10_edge_data_capacity_graph_bb84_network_no_switching",  node_data_store_location = "10_node_data_capacity_graph_bb84_network_no_switching")
-# new_graphs_2.store_position_graph(node_data_store_location = "5_no_switching_nodes_bb84_network_position_graph", edge_data_store_location = "5_no_switching_edges_bb84_network_position_graph")
-# new_graphs_2.store_n_k_for_n_state(n = 2,store_file_location="5_no_switching_cap_needed_bb84_graph")
+new_graphs.store_capacity_edge_graph_distance_bb84(dictionary_bb84, store_file_location = "10_edge_data_capacity_graph_bb84_network",  node_data_store_location = "10_node_data_capacity_graph_bb84_network")
+new_graphs.store_capacity_edge_graph_distance_bb84_no_switching(dictionary_bb84, store_file_location = "10_edge_data_capacity_graph_bb84_network_no_switching",  node_data_store_location = "10_node_data_capacity_graph_bb84_network_no_switching")
+new_graphs_2.store_position_graph(node_data_store_location = "5_no_switching_nodes_bb84_network_position_graph", edge_data_store_location = "5_no_switching_edges_bb84_network_position_graph")
+new_graphs_2.store_n_k_for_n_state(n = 2,store_file_location="5_no_switching_cap_needed_bb84_graph")
 #
 # # here is where you can do a parameter sweep - run using multiple different dictionaries.
 # # new_graphs.store_n_k_for_n_state_bb84(dictionary_bb84, c_min=1000, store_file_location="t_cap_needed_bb84_graph")
