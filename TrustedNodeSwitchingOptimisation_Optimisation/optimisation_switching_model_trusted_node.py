@@ -228,10 +228,10 @@ class Optimisation_Switching_No_Calibration(Optimisation_Switching_Problem):
                     val.extend([1, 1])
                 lin_expressions = [cplex.SparsePair(ind=ind, val=val)]
                 if isinstance(cmin, dict):
-                    self.prob.linear_constraints.add(lin_expr=lin_expressions, senses=["G"], rhs=[self.key_dict[k] * cmin[k]])
+                    self.prob.linear_constraints.add(lin_expr=lin_expressions, senses=["G"], rhs=[float(self.key_dict[k] * cmin[k])])
                 else:
                     self.prob.linear_constraints.add(lin_expr=lin_expressions, senses=["G"],
-                                                     rhs=[self.key_dict[k] * cmin])
+                                                     rhs=[float(self.key_dict[k] * cmin)])
 
     def add_flow_into_source(self):
         """
@@ -305,19 +305,20 @@ class Optimisation_Switching_No_Calibration(Optimisation_Switching_Problem):
         """
         for i in self.g.nodes:
             for k in self.key_dict:
-                if k[0] != i and k[0] < k[1]:
+                if k[0] != i:
                     ind_flow = []
                     val = []
                     for j in self.g.adj[i]:
-                        ind_flow.extend([f"x{i}_{j}_k{k[0]}_{k[1]}", f"x{j}_{i}_k{k[1]}_{k[0]}"])
-                        val.extend([1,1])
+                        if k[0] < k[1]:
+                            ind_flow.extend([f"x{i}_{j}_k{k[0]}_{k[1]}", f"x{j}_{i}_k{k[1]}_{k[0]}"])
+                            val.extend([1,1])
                     lin_expr = [cplex.SparsePair(ind=ind_flow, val=val)]
                     if isinstance(cmin, dict):
                         self.prob.linear_constraints.add(lin_expr=lin_expr, senses='L' * len(lin_expr),
-                                             rhs=[cmin[k]] * len(lin_expr))
+                                             rhs=[float(cmin[k])] * len(lin_expr))
                     else:
                         self.prob.linear_constraints.add(lin_expr=lin_expr, senses='L' * len(lin_expr),
-                                                         rhs=[cmin] * len(lin_expr))
+                                                         rhs=[float(cmin)] * len(lin_expr))
 
 
     def add_objective_function(self, cost_on_trusted_node, cost_detector, cost_source, *args, **kwargs):

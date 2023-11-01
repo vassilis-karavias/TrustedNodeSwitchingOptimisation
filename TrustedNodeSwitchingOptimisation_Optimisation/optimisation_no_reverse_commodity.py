@@ -70,46 +70,25 @@ class Optimisation_Problem_No_Switching(Optimisation_Switching_Problem):
 
 
 
-    def add_flow_conservation_constraint(self):
+    def add_flow_conservation_constraint(self, cmin):
         """Applies constraints to cplex problem for flow conservation
         key_dict contains only keys with terms k[0] < k[1]
         """
+        num_comm=len(self.key_dict)# checks number of key exchange pairs i.e. number of commodities
+        num_nodes= self.g.number_of_nodes()
+        variable_names=[f'x{i}_{j}_k{k[0]}_{k[1]}' for k in self.key_dict for i,j in list(self.g.edges) ] # name convention x1_2k3_4 is flow in direction 1 to 2 for key 3 to 4
+        flow=[[[int(i+k*num_nodes),int(j+k*num_nodes)], [1.0,-1.0]] for k in range(num_comm) for i,j in self.g.edges ] # tails are positive, heads negative, ensures source, sink balance
 
-        variable_names = [f'x{i}_{j}_k{k[0]}_{k[1]}' for k in self.key_dict for i, j in list(self.g.edges)]
-        self.prob.variables.add(names=variable_names,
-                                types=[self.prob.variables.type.integer] * len(variable_names))
-
-        for i in self.g.nodes:
-            for k in self.key_dict:
-                if k[0] != i and k[1] != i:
-                    flow = []
-                    val = []
-                    for n in self.g.neighbors(i):
-                        flow.extend([f"x{i}_{n}_k{k[0]}_{k[1]}", f"x{n}_{i}_k{k[0]}_{k[1]}"])
-                        val.extend([1, -1])
-                    lin_expressions = [cplex.SparsePair(ind=flow, val=val)]
-                    self.prob.linear_constraints.add(lin_expr=lin_expressions, senses=["E"], rhs=[0.])
-
-    def add_flow_requirement_constraint(self, cmin):
-        """
-               Adds the constraint to ensure the total flow into sink is greater than the required flow
-
-               \sum_{m \in N(j)} x_{(m,j)}^{k=(i,j)} + x_{(j,m)}^{k_R= (j,i)}  \geq N'_k c_{min}
-               """
-        for k in self.key_dict:
-            if k[0] < k[1]:
-                ind = []
-                val = []
-                for n in self.g.neighbors(k[1]):
-                    ind.extend([f"x{n}_{k[1]}_k{k[0]}_{k[1]}"])
-                    val.extend([1])
-                lin_expressions = [cplex.SparsePair(ind=ind, val=val)]
-                if isinstance(cmin, dict):
-                    self.prob.linear_constraints.add(lin_expr=lin_expressions, senses=["G"],
-                                                     rhs=[self.key_dict[k] * cmin[k]])
-                else:
-                    self.prob.linear_constraints.add(lin_expr=lin_expressions, senses=["G"],
-                                                     rhs=[self.key_dict[k] * cmin])
+        sn=np.zeros(num_nodes*num_comm) # zeros ensure flow conservation
+        count=0
+        for pair,num_keys in self.key_dict.items():
+            active_commodity=count*num_nodes
+            sn[int(pair[0])+active_commodity]=int(num_keys * cmin) # sets source
+            sn[int(pair[1])+active_commodity]=-int(num_keys * cmin) # sets sink
+            count+=1 # counter moves forward for next commodity
+        my_senses='E'*num_nodes*num_comm
+        self.prob.linear_constraints.add(senses=my_senses,rhs=sn.tolist())
+        self.prob.variables.add(names=variable_names, columns=flow, types=[self.prob.variables.type.integer]*len(variable_names)) # add variables and flow conservation
 
 
     def add_flow_into_source(self):
@@ -132,7 +111,7 @@ class Optimisation_Problem_No_Switching(Optimisation_Switching_Problem):
             source_node_type = self.g.nodes[nodes[0]]["type"]
             target_node_type = self.g.nodes[nodes[1]]["type"]
             # if target node is a source node then only if the commidity is for target node can the flow in be non-zero
-            if target_node_type == "S":
+            if target_node_type == "S" or target_node_type == "NodeType.S":
                 source_node = nodes[0]
                 target_node = nodes[1]
                 ind_flow = []
@@ -160,10 +139,10 @@ class Optimisation_Problem_No_Switching(Optimisation_Switching_Problem):
                     lin_expr = [cplex.SparsePair(ind=ind_flow, val=val)]
                     if isinstance(cmin, dict):
                         self.prob.linear_constraints.add(lin_expr=lin_expr, senses='L' * len(lin_expr),
-                                                         rhs=[cmin[k]] * len(lin_expr))
+                                                         rhs=[float(cmin[k])] * len(lin_expr))
                     else:
                         self.prob.linear_constraints.add(lin_expr=lin_expr, senses='L' * len(lin_expr),
-                                                         rhs=[cmin] * len(lin_expr))
+                                                         rhs=[float(cmin)] * len(lin_expr))
 
 
     def add_minimise_overall_cost_objective(self, cost_node, cost_connection):
@@ -194,13 +173,12 @@ class Optimisation_Problem_No_Switching(Optimisation_Switching_Problem):
         t_0 = time.time()
         print("Start Optimisation")
         # add constraints to the problem
-        self.add_flow_conservation_constraint()
-        self.add_flow_requirement_constraint(cmin)
+        self.add_flow_conservation_constraint(cmin)
         self.add_flow_into_source()
         self.add_lambda_constraint(Lambda=Lambda)
         self.lambda_constraint(Lambda=Lambda)
-        # self.add_constraint_source_nodes()
-        # self.add_limited_flow_through_connection(cmin)
+        self.add_constraint_source_nodes()
+        self.add_limited_flow_through_connection(cmin)
         # add_minimise_trusted_nodes_objective(prob, g)
         # add objective to the problem
         self.add_minimise_overall_cost_objective(cost_node, cost_connection)
