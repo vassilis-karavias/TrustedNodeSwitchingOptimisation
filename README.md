@@ -1,7 +1,7 @@
 # TrustedNodeSwitchingOptimisation
 Repository for TN switching optimisation
 
-# dependencies
+# Requirements
 numpy: 1.20.1+  
 graph-tool: 2.37+  
 pandas: 1.5.2+  
